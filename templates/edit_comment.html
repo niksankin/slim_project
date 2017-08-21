@@ -1,0 +1,19 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>Edit</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			<form action={{edit}} method="post">		
+				Text:<br>
+				<textarea maxlength=4096 rows="20" cols="100" name="text">{{ comment.text }}</textarea><br>
+				<input type="submit">
+				{{ error }}		
+			</form>
+		</div>
+	</main>
+{% endblock %}

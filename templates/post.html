@@ -1,0 +1,36 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>Posts by {{ post.fullname }}</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			<h1>Created by {{post.fullname}}</h1>
+			<h2>{{post.title}}</h2>
+			<p>{{post.created_at}}</p>
+			<p>{{post.text}}</p>
+			{% if edit.isEdit %}
+				<a href={{edit.edit}}><input type="button" value="Edit post"></a>
+				<a href={{edit.delete}}><input type="button" value="Delete post"></a>
+			{% endif %}
+			<form action={{add_comment}} method="post">
+				<h2>Enter your comment:</h2>
+				<textarea maxlength="360" cols="60" rows="6" name="text"></textarea>
+				<input type="submit">
+			</form>
+			<h2>Comments:</h2>
+			{% for comment in comments%}
+				<h3>Author: {{comment.fullname}} </h3>
+				<p>{{comment.text}}</p>
+				<p>{{comment.created_at}}</p>
+				{% if comment.isEdit %}
+					<a href={{comment.edit}}><input type="button" value="Edit comment"></a>
+					<a href={{comment.delete}}><input type="button" value="Delete comment"></a>
+				{% endif%}
+			{% endfor%}
+		</div>
+	</main>
+{% endblock %}

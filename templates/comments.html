@@ -1,0 +1,19 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>Comments</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			{% for comment in comments%}
+				<a href={{comment.post_href}}><h3>To post: {{comment.post_title}}</h3></a>
+				<p>{{comment.text}}</p>
+				<a href={{comment.edit}}><input type="button" value="Edit"></a>
+				<a href={{comment.delete}}><input type="button" value="Delete"></a>
+			{% endfor %}
+		</div>
+	</main>
+{% endblock %}

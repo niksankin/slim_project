@@ -1,0 +1,37 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>{{user.fullname}}</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			<div id="user">
+				<h1>{{user.fullname}}</h1>
+				<b>{{user.status}}</b>
+				{% if user.last_online %}
+					<b>Last online: {{user.last_online}}</b>
+				{% endif %}
+				<h3>E-mail: {{user.email}}</h3>
+				{% if isEdit %}
+					<a href="/posts/new"><input type="button" value="New post"></a>
+				{% elseif user.follow %}
+					<a href={{user.follow}}><input type="button" value="Follow"></a>
+				{% elseif user.unfollow%}
+					<a href={{user.unfollow}}><input type="button" value="Unfollow"></a>
+				{% endif %}
+			</div>
+			<h1>User posts:</h1>
+			{% for post in posts%}
+				<a href={{post.href}}><h3>{{post.title}}</h3></a>
+				<p>{{post.created_at}}</p>
+				{% if isEdit %}
+					<a href={{post.edit}}><input type="button" value="Edit"></a>
+					<a href={{post.delete}}><input type="button" value="Delete"></a>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</main>
+{% endblock %}

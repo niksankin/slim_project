@@ -1,0 +1,21 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>Subscriptions</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			{% for user in users%}
+				<a href={{user.href}}><h3>{{user.fullname}}</h3></a>
+				<b>{{user.status}}</b>
+				{% if user.last_online %}
+					<b>Last online: {{user.last_online}}</b>
+				{% endif %}
+				<a href={{user.unfollow}}><input type="button" value="Unfollow"></a>
+			{% endfor %}
+		</div>
+	</main>
+{% endblock %}

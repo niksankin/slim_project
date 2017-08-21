@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!-- Template by html.am -->
+<html>
+	<head>
+		{% block head %}
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" href="/css/template.css">	
+		{% endblock %}
+	</head>
+	
+	<body>		
+
+		<header id="header">
+			{% block header %}
+				<a href="/posts"><div id="logo">LOGO</div></a>
+				<a href="/login/logout"><div id="side-user">Logout</div></a>
+			{% endblock %}
+		</header>
+				
+		{% block main %}
+		{% endblock %}
+		
+		{% block nav %}
+			<nav id="nav">
+				<div class="innertube">
+					<ol>
+						<a href={{user_page}}><li>Profile</li></a>
+						<a href="/posts"><li>News</li></a>
+						<a href="/subscriptions"><li>Subscriptions</li></a>
+						<a href="/comments"><li>Comments</li></a>
+					</ol>
+				</div>
+			</nav>
+		{% endblock %}
+	</body>
+</html>

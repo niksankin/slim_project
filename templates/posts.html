@@ -1,0 +1,18 @@
+{% extends "template.html" %}
+
+{% block head%}
+	{{ parent() }}
+	<title>News</title>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			{% for post in posts%}
+				<h2>Author: <a href="/{{post.user_id}}">{{post.fullname}}</a></h2>
+				<a href={{post.href}}><h3>{{post.title}}</h3></a>
+				<p>{{post.created_at}}</p>
+			{% endfor %}
+		</div>
+	</main>
+{% endblock %}

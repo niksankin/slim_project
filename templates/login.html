@@ -1,0 +1,30 @@
+{% extends "template.html" %}
+
+{% block head %}
+	{{ parent() }}
+	<title>Login</title>
+{% endblock %}
+
+{% block header %}
+	<div id="logo">LOGO</div>
+{% endblock %}
+
+{% block main %}
+	<main>
+		<div class="innertube">
+			<form action="/login" method="post">
+				Login:<br>
+				<input type="text" name="login"><br>
+				Password:<br>
+				<input type="password" name="password"><br>
+				<input type="submit">
+			</form>
+			<p><b>Or:</b></p>
+			<a href="/login/register"><input type="button" value="Register"></a>
+			{{error}}
+		</div>
+	</main>
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
