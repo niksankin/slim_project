@@ -13,4 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     public $timestamps = false;
+
+    public function post(){
+        return $this->belongsTo('Models\Post');
+    }
+
+    public function user(){
+        return $this->belongsTo('Models\User');
+    }
 }

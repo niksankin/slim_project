@@ -19,7 +19,9 @@
         "slim/twig-view": "^2.2",
         "illuminate/database": "^5.4",
         "twig/twig": "^1.34",
-        "akrabat/rka-ip-address-middleware": "^0.5.0"
+        "akrabat/rka-ip-address-middleware": "^0.5.0",
+        "vlucas/valitron": "^1.4",
+        "robmorgan/phinx": "^0.9.0"
     },
     "require-dev": {
         "phpunit/phpunit": ">=4.8 < 6.0"

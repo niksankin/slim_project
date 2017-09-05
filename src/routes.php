@@ -14,8 +14,8 @@ $app->group('/{id:[0-9]+}', function(){
 $app->get('/subscriptions', Controllers\Users::class.":subscriptions");
 
 $app->group('/login', function(){
-    $this->map(['GET', 'POST'], '', Controllers\Authentication::class.":login");
-    $this->map(['GET', 'POST'], '/register', Controllers\Authentication::class.":register");
+    $this->map(['GET', 'POST'], '', Controllers\Authentication::class.":login")->setArgument('skipAuth', true);
+    $this->map(['GET', 'POST'], '/register', Controllers\Authentication::class.":register")->setArgument('skipAuth', true);
     $this->get('/logout', Controllers\Authentication::class.":logout");
 });
 

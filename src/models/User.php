@@ -13,4 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Model
 {
     public $timestamps = false;
+
+    public function subscriptions(){
+        return $this->hasMany('Models\Subscription');
+    }
+
+    public function posts(){
+        return $this->hasMany('Models\Post');
+    }
 }

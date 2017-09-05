@@ -1,13 +1,9 @@
 <?php
 return [
     'settings' => [
+        'determineRouteBeforeAppMiddleware' => true,
         'displayErrorDetails' => true, // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
-
-        // Renderer settings
-        'renderer' => [
-            'template_path' => __DIR__ . '/../templates/',
-        ],
 
         // Monolog settings
         'logger' => [
@@ -19,16 +15,16 @@ return [
         'db' => [
             'driver' => 'mysql',
             'host' => 'localhost',
-            'database' => 'slim_project',
-            'username' => 'admin',
-            'password' => '12345',
+            'database' => 'lol',
+            'username' => 'kek',
+            'password' => 'puk',
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
         ],
 
         'twig' => [
-            'templates' => 'D:\SERVER\OpenServer\OSPanel\domains\slimproject\templates',
+            'templates' => __DIR__ . '/../templates/',
         ],
     ],
 ];

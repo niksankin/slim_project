@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Models\Post;
 use Models\Comment;
 use Models\Subscription;
+use Models\User;
 use Psr\Container\ContainerInterface;
+use Valitron\Validator;
 
 class Posts
 {
@@ -21,7 +23,7 @@ class Posts
 
     public function __construct(ContainerInterface $c){
         $this->container = $c;
-        $this->container["twig"]->addGlobal("user_page", '/'.$_SESSION["id"]);
+        $this->container["twig"]->addGlobal("session", $_SESSION["id"]);
     }
 
     public function posts($request, $response, $args){
@@ -31,7 +33,14 @@ class Posts
             ->leftJoin("users", "users.id", "=", "subscriptions.user_target_id")
             ->leftJoin("posts", "posts.user_id", "=", "users.id")
             ->where("posts.id", "<>", null)
-            ->orderBy("posts.created_at", "desc")->get()->toArray();
+            ->orderBy("posts.created_at", "desc")->get();
+
+       /* $data = User::find($_SESSION["id"])
+            ->select("posts.id as post_id", "users.id as user_id", "users.fullname", "posts.title", "posts.created_at")
+            ->subscriptions()
+            ->user_target()->has('posts')
+            ->posts()
+            ->orderBy("posts.created_at", "desc")->get();*/
 
         foreach ($data as &$post){
             $post["href"] = "/posts/".$post["post_id"];
@@ -49,7 +58,7 @@ class Posts
             $data = Post::select("users.fullname", "posts.title", "posts.text", "posts.created_at", "posts.user_id")
                 ->leftJoin("users", "posts.user_id", "=", "users.id")
                 ->where("posts.id", "=", $args["id"])
-                ->firstOrFail()->toArray();
+                ->firstOrFail();
         }
         catch (ModelNotFoundException $e){
             return $response->withStatus(404);
@@ -58,21 +67,21 @@ class Posts
         $comments = Comment::select("users.fullname", "comments.created_at", "comments.text", "comments.user_id", "comments.id")
             ->where("comments.post_id", "=", $args["id"])
             ->leftJoin("users", "comments.user_id", "=", "users.id")
-            ->orderBy("comments.created_at", "desc")->get()->toArray();
+            ->orderBy("comments.created_at", "desc")->get();
 
         foreach($comments as &$comment){
-            if($comment["user_id"] == $_SESSION["id"]) {
-                $comment["isEdit"] = true;
-                $comment["edit"] = "/posts/comment/edit?" . http_build_query(array("post_id" => $args["id"], "comm_id" => $comment["id"]));
-                $comment["delete"] = "/posts/comment/delete?" . http_build_query(array("comm_id" => $comment["id"]));
+            if($comment->user_id == $_SESSION["id"]) {
+                $comment->isEdit = true;
+                $comment->edit = "/posts/comment/edit?" . http_build_query(array("post_id" => $args["id"], "comm_id" => $comment->id));
+                $comment->delete = "/posts/comment/delete?" . http_build_query(array("comm_id" => $comment->id));
             }
             else
-                $comment["isEdit"] = false;
+                $comment->isEdit = false;
         }
 
         $add_comment = "/posts/comment?".http_build_query(array("post_id" => $args["id"]));
 
-        if($data["user_id"] == $_SESSION["id"]) {
+        if($data->user_id == $_SESSION["id"]) {
             $edit["isEdit"] = true;
             $edit["edit"] = "/posts/edit?" . http_build_query(array("id" => $args["id"]));
             $edit["delete"] = "/posts/delete?" . http_build_query(array("id" => $args["id"]));
@@ -94,30 +103,20 @@ class Posts
             die();
         }
 
-        $error = array();
-
         $data = $request->getParsedBody();
 
-        if(empty($data["title"]))
-            $error["title"] = "Enter title!";
-        if(empty($data["text"]))
-            $error["text"] = "Enter text of the post!";
+        $validator = new Validator($data);
 
-        if(!empty($error)){
+        $rules = [
+            'title' => [['required'], ['lengthMax', 32]],
+            'text' => [['required'], ['lengthMax', 4096]]
+        ];
+
+        $validator->mapFieldsRules($rules);
+
+        if(!$validator->validate()){
             $template = $this->container["twig"]->load("edit_post.html");
-            $template->display(array("errors" => $error, "post" => $data, "edit" => $request->getUri()));
-            die();
-        }
-
-        if(strlen($data["text"]) > 4096)
-            $error["text"] = "Post length must be not above 4096 symbols!";
-
-        if(strlen($data["title"]) > 32)
-            $error["title"] = "Title length must be not above 32 symbols!";
-
-        if(!empty($error)){
-            $template = $this->container["twig"]->load("edit_post.html");
-            $template->display(array("errors" => $error, "post" => $data, "edit" => $request->getUri()));
+            $template->display(array("errors" => $validator->errors(), "post" => $data, "edit" => $request->getUri()));
             die();
         }
 
@@ -145,13 +144,13 @@ class Posts
         }
 
         try{
-            $data = Post::where("id", "=", $id)->firstOrFail()->toArray();
+            $data = Post::where("id", "=", $id)->firstOrFail();
         }
         catch (ModelNotFoundException $e){
             return $response->withStatus(404);
         }
 
-        if($data["user_id"] !== $_SESSION["id"])
+        if($data->user_id !== $_SESSION["id"])
             return $response->withRedirect("/posts");
 
         if($request->getMethod() !== "POST") {
@@ -172,13 +171,13 @@ class Posts
             return $response->withRedirect("/posts");
 
         try{
-            $data = Post::where("id", "=", $id)->firstOrFail()->toArray();
+            $data = Post::where("id", "=", $id)->firstOrFail();
         }
         catch(ModelNotFoundException $e){
             return $response->withStatus(404);
         }
 
-        if($data["user_id"] !== $_SESSION["id"])
+        if($data->user_id !== $_SESSION["id"])
             return $response->withRedirect("/posts");
 
         Post::where("id", "=", $id)->delete();
@@ -192,12 +191,12 @@ class Posts
         $comments = Comment::select("comments.text", "comments.id as comm_id", "posts.id as post_id", "posts.title as post_title")
             ->leftJoin("posts", "posts.id", "=", "comments.post_id")
             ->where("comments.user_id", "=", $_SESSION["id"])
-            ->get()->toArray();
+            ->get();
 
         foreach($comments as &$comment){
-            $comment["post_href"] = "/posts/".$comment["post_id"];
-            $comment["edit"] = "/posts/comment/edit?".http_build_query(array("post_id" => $comment["post_id"], "comm_id" => $comment["comm_id"]));
-            $comment["delete"] = "/posts/comment/delete?".http_build_query(array("comm_id" => $comment["comm_id"]));
+            $comment->post_href = "/posts/".$comment->post_id;
+            $comment->edit = "/posts/comment/edit?".http_build_query(array("post_id" => $comment->post_id, "comm_id" => $comment->comm_id));
+            $comment->delete = "/posts/comment/delete?".http_build_query(array("comm_id" => $comment->comm_id));
         }
 
         $template = $this->container["twig"]->load("comments.html");
@@ -215,13 +214,16 @@ class Posts
         }
 
         $data = $request->getParsedBody();
-        $error = false;
 
-        if(empty($data["text"]) || strlen($data["text"]) > 360){
-            $error = true;
-        }
+        $validator = new Validator($data);
 
-        if($error){
+        $rules=[
+            'text' => [['required'], ['lengthMax', 360]]
+        ];
+
+        $validator->mapFieldsRules($rules);
+
+        if(!$validator->validate()){
             return $response->withRedirect("/posts/".$post_id);
         }
 
@@ -249,13 +251,13 @@ class Posts
             return $response->withRedirect("/posts");
 
         try{
-            $data = Comment::where("id", "=", $comm_id)->firstOrFail()->toArray();
+            $data = Comment::where("id", "=", $comm_id)->firstOrFail();
         }
         catch (ModelNotFoundException $e){
             return $response->withStatus(404);
         }
 
-        if($data["user_id"] !== $_SESSION["id"] || $data["post_id"] !== $post_id)
+        if($data->user_id !== $_SESSION["id"] || $data->post_id !== $post_id)
             return $response->withRedirect("/posts");
 
         if($request->getMethod() !== "POST") {
@@ -264,7 +266,7 @@ class Posts
             die();
         }
 
-        $request = $request->withAttribute("update", $data["id"]);
+        $request = $request->withAttribute("update", $data->id);
         return $this->comment($request, $response, $args);
     }
 
@@ -276,16 +278,16 @@ class Posts
             return $response->withRedirect("/posts");
 
         try{
-            $data = Comment::where("id", "=", $comm_id)->firstOrFail()->toArray();
+            $data = Comment::where("id", "=", $comm_id)->firstOrFail();
         }
         catch (ModelNotFoundException $e){
             return $response->withStatus(404);
         }
 
-        if($data["user_id"] !== $_SESSION["id"])
+        if($data->user_id !== $_SESSION["id"])
             return $response->withRedirect("/posts");
 
-        $post_id = $data["post_id"];
+        $post_id = $data->post_id;
 
         Comment::where("id", "=", $comm_id)->delete();
 

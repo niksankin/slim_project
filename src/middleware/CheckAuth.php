@@ -21,20 +21,17 @@ class CheckAuth
 
     public function __invoke($request, $response, $next){
 
-        if(!isset($_SESSION["id"])
-            && $request->getUri()->getPath() !== "/login"
-            && $request->getUri()->getPath() !== "/login/register")
+        if(empty($request->getAttribute('route')))
+            return $next($request, $response);
 
+        $skipAuth = $request->getAttribute('route')->getArgument('skipAuth');
+
+        if(!isset($_SESSION["id"]) && !$skipAuth)
             return $response->withRedirect("/login");
-
-        if(isset($_SESSION["id"])
-            && ($request->getUri()->getPath() == "/login"
-            || $request->getUri()->getPath() == "/login/register"))
-
+        else if(isset($_SESSION["id"]) && $skipAuth)
             return $response->withRedirect("/posts");
+        else
+            return $next($request, $response);
 
-        $response = $next($request, $response);
-
-        return $response;
     }
 }

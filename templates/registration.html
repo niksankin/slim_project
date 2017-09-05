@@ -23,9 +23,10 @@
 			<input type="password" name="password"><br>
 			<input type="submit">
 		</form>
-		{% for error in errors%}
-			<p>{{error}}</p>
-		{%endfor%}
+		<p>{{errors.login[0]}}</p>
+		<p>{{errors.password[0]}}</p>
+		<p>{{errors.fullname[0]}}</p>
+		<p>{{errors.email[0]}}</p>
 		</div>
 	</main>
 {% endblock %}
